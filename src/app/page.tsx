@@ -30,7 +30,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex h-screen flex-col items-center justify-between p-6 lg:p-20">
+    <main className="flex h-[100svh] flex-col items-center justify-between p-6 lg:p-20">
       <div></div>
       <div className="flex max-w-[300px] flex-col items-center gap-6 md:max-w-[500px] md:gap-12 lg:max-w-[700px] lg:gap-16">
         <h1 ref={titleRef}>mobe studio</h1>
