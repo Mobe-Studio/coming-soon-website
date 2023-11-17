@@ -1,9 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import Logo from '@/../public/logo.svg';
 import { gsap } from 'gsap';
-import { useLayoutEffect, useRef } from 'react';
+import { Bodies, Engine, Render, Runner, World } from 'matter-js';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 export default function Home() {
+  const scene = useRef();
+  const engine = useRef(Engine.create());
+
   const logoRef = useRef(null);
   const descriptionRef = useRef(null);
   const onlineSoonRef = useRef(null);
@@ -30,6 +35,61 @@ export default function Home() {
     return () => ctx.revert();
   }, []);
 
+  useEffect(() => {
+    const sceneCurrent = scene.current;
+    const engineCurrent = engine.current;
+
+    const chips = ['UX', 'Coding', 'UI', 'Figma', 'Github', 'Twitter', 'Behance', 'Email', 'Discord', 'YouTube'];
+
+    const cw = document.body.clientWidth;
+    const ch = document.body.clientHeight;
+
+    World.add(engineCurrent.world, [
+      Bodies.rectangle(cw / 2, ch - 20, cw, 10, { isStatic: true }),
+      Bodies.rectangle(0, ch / 2, 10, ch, { isStatic: true }),
+      Bodies.rectangle(cw, ch / 2, 10, ch, { isStatic: true }),
+    ]);
+
+    World.add(
+      engineCurrent.world,
+      chips.map(chip =>
+        Bodies.rectangle(Math.random() * cw, 200, 180, 64, {
+          mass: 10,
+          restitution: 0.9,
+          friction: 0.005,
+          angle: Math.random() * 360,
+          render: {
+            fillStyle: '#FFFFFF',
+            strokeStyle: '3px solid #0f0f0f',
+          },
+        }),
+      ),
+    );
+
+    const render = Render.create({
+      element: sceneCurrent,
+      engine: engineCurrent,
+      options: {
+        width: cw,
+        height: ch,
+        wireframes: false,
+        background: 'transparent',
+      },
+    });
+
+    const runner = Runner.run(engineCurrent);
+    Render.run(render);
+
+    return () => {
+      Render.stop(render);
+      Runner.stop(runner);
+      World.clear(engineCurrent.world, false);
+      Engine.clear(engineCurrent);
+      render.canvas.remove();
+      render.textures = {};
+    };
+  }, []);
+
   return (
     <main className="flex h-[100svh] flex-col items-center justify-between p-6 lg:p-8">
       <div></div>
@@ -46,6 +106,7 @@ export default function Home() {
       <p ref={onlineSoonRef} className="text-base font-normal uppercase lg:text-lg">
         Online soon
       </p>
+      <div ref={scene as any} className="absolute inset-0" />
     </main>
   );
 }
