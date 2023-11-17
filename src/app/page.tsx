@@ -53,7 +53,7 @@ export default function Home() {
     World.add(
       engineCurrent.world,
       chips.map(chip =>
-        Bodies.rectangle(Math.random() * cw, 200, 180, 64, {
+        Bodies.rectangle(Math.random() * cw, Math.random() * -200 - 200, 180, 64, {
           mass: 10,
           restitution: 0.9,
           friction: 0.005,
