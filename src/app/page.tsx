@@ -5,6 +5,12 @@ import { gsap } from 'gsap';
 import { Bodies, Engine, Render, Runner, World } from 'matter-js';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 
+const LOGO_ANIMATION_DURATION_SECS = 0.5;
+const DESCRIPTION_ANIMATION_DURATION_SECS = 0.8;
+const ONLINE_SOON_ANIMATION_DURATION_SECS = 0.8;
+const SLEEP_BEFORE_CHIPS_SECS =
+  LOGO_ANIMATION_DURATION_SECS + DESCRIPTION_ANIMATION_DURATION_SECS + ONLINE_SOON_ANIMATION_DURATION_SECS + 1;
+
 export default function Home() {
   const scene = useRef();
   const engine = useRef(Engine.create());
@@ -19,15 +25,15 @@ export default function Home() {
         .timeline()
         .from(logoRef.current, {
           y: '160',
-          duration: 0.5,
+          duration: LOGO_ANIMATION_DURATION_SECS,
           opacity: 0,
         })
         .from(descriptionRef.current, {
-          duration: 0.8,
+          duration: DESCRIPTION_ANIMATION_DURATION_SECS,
           opacity: 0,
         })
         .from(onlineSoonRef.current, {
-          duration: 0.8,
+          duration: ONLINE_SOON_ANIMATION_DURATION_SECS,
           opacity: 0,
         });
     });
@@ -45,26 +51,10 @@ export default function Home() {
     const ch = document.body.clientHeight;
 
     World.add(engineCurrent.world, [
-      Bodies.rectangle(cw / 2, ch - 20, cw, 10, { isStatic: true }),
+      Bodies.rectangle(cw / 2, ch, cw, 10, { isStatic: true }),
       Bodies.rectangle(0, ch / 2, 10, ch, { isStatic: true }),
       Bodies.rectangle(cw, ch / 2, 10, ch, { isStatic: true }),
     ]);
-
-    World.add(
-      engineCurrent.world,
-      chips.map(chip =>
-        Bodies.rectangle(Math.random() * cw, Math.random() * -200 - 200, 180, 64, {
-          mass: 10,
-          restitution: 0.9,
-          friction: 0.005,
-          angle: Math.random() * 360,
-          render: {
-            fillStyle: '#FFFFFF',
-            strokeStyle: '3px solid #0f0f0f',
-          },
-        }),
-      ),
-    );
 
     const render = Render.create({
       element: sceneCurrent,
@@ -80,7 +70,26 @@ export default function Home() {
     const runner = Runner.run(engineCurrent);
     Render.run(render);
 
+    const timeoutHandle = setTimeout(() => {
+      World.add(
+        engineCurrent.world,
+        chips.map(chip =>
+          Bodies.rectangle(Math.random() * cw, Math.random() * -200 - 200, 180, 64, {
+            mass: 10,
+            restitution: 0.5,
+            friction: 0.005,
+            angle: Math.random() * 360,
+            render: {
+              fillStyle: '#FFFFFF',
+              strokeStyle: '3px solid #0f0f0f',
+            },
+          }),
+        ),
+      );
+    }, SLEEP_BEFORE_CHIPS_SECS * 1000);
+
     return () => {
+      clearTimeout(timeoutHandle);
       Render.stop(render);
       Runner.stop(runner);
       World.clear(engineCurrent.world, false);
@@ -106,6 +115,7 @@ export default function Home() {
       <p ref={onlineSoonRef} className="text-base font-normal uppercase lg:text-lg">
         Online soon
       </p>
+      {/* <div ref={scene as any} className="absolute inset-0 -z-10" /> */}
       <div ref={scene as any} className="absolute inset-0" />
     </main>
   );
