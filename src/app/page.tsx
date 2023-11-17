@@ -30,7 +30,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex h-[100svh] flex-col items-center justify-between p-6 lg:p-20">
+    <main className="flex h-[100svh] flex-col items-center justify-between p-6 lg:p-8">
       <div></div>
       <div className="flex max-w-[300px] flex-col items-center gap-6 md:max-w-[500px] md:gap-12 lg:max-w-[700px] lg:gap-16">
         <h1 ref={titleRef}>mobe studio</h1>
@@ -38,7 +38,7 @@ export default function Home() {
           Digital Experience studio based in Bergamo (Italy)
         </p>
       </div>
-      <p ref={onlineSoonRef} className="text-lg font-normal uppercase md:text-3xl lg:text-4xl">
+      <p ref={onlineSoonRef} className="text-base font-normal uppercase lg:text-lg">
         Online soon
       </p>
     </main>
