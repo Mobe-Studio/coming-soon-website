@@ -2,7 +2,7 @@
 'use client';
 import Logo from '@/../public/logo.svg';
 import { gsap } from 'gsap';
-import { Bodies, Engine, Render, Runner, World } from 'matter-js';
+import { Bodies, Engine, MouseConstraint, World } from 'matter-js';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 
 const LOGO_ANIMATION_DURATION_SECS = 0.5;
@@ -10,14 +10,57 @@ const DESCRIPTION_ANIMATION_DURATION_SECS = 0.8;
 const ONLINE_SOON_ANIMATION_DURATION_SECS = 0.8;
 const SLEEP_BEFORE_CHIPS_SECS =
   LOGO_ANIMATION_DURATION_SECS + DESCRIPTION_ANIMATION_DURATION_SECS + ONLINE_SOON_ANIMATION_DURATION_SECS + 1;
+const SLEEP_BEFORE_TOP_BOUND_SECS = SLEEP_BEFORE_CHIPS_SECS + 2;
+const CHIP_WIDTH = 180;
+const CHIP_HEIGHT = 48;
+const CHIPS = [
+  'Code',
+  'Development',
+  'Software',
+  'User Experience',
+  'User Interface',
+  'Animation',
+  'Branding',
+  'Creativity',
+  'Web-design',
+];
+const CHIP_BG_COLORS = [
+  '#45C358',
+  '#45C358',
+  '#45C358',
+  '#505FEC',
+  '#505FEC',
+  '#505FEC',
+  '#FFFFFF',
+  '#FFFFFF',
+  '#FFFFFF',
+];
+const CHIP_TEXT_COLORS = [
+  '#FFFFFF',
+  '#FFFFFF',
+  '#FFFFFF',
+  '#FFFFFF',
+  '#FFFFFF',
+  '#FFFFFF',
+  '#505FEC',
+  '#505FEC',
+  '#505FEC',
+];
+
+type Chip = {
+  body: Matter.Body;
+  elem: HTMLDivElement | undefined;
+  render(): void;
+};
 
 export default function Home() {
-  const scene = useRef();
-  const engine = useRef(Engine.create());
-
   const logoRef = useRef(null);
   const descriptionRef = useRef(null);
   const onlineSoonRef = useRef(null);
+
+  const requestRef = useRef<number>();
+  const engineRef = useRef(Engine.create());
+  const chipRefs = useRef<(HTMLDivElement | undefined)[]>(CHIPS.map(() => undefined));
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -42,60 +85,75 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const sceneCurrent = scene.current;
-    const engineCurrent = engine.current;
-
-    const chips = ['UX', 'Coding', 'UI', 'Figma', 'Github', 'Twitter', 'Behance', 'Email', 'Discord', 'YouTube'];
+    const engine = engineRef.current;
 
     const cw = document.body.clientWidth;
     const ch = document.body.clientHeight;
 
-    World.add(engineCurrent.world, [
-      Bodies.rectangle(cw / 2, ch, cw, 10, { isStatic: true }),
-      Bodies.rectangle(0, ch / 2, 10, ch, { isStatic: true }),
-      Bodies.rectangle(cw, ch / 2, 10, ch, { isStatic: true }),
+    const mouseConstraint = MouseConstraint.create(engine);
+    World.add(engine.world, [
+      // Bottom
+      Bodies.rectangle(cw / 2, ch, cw * 2, 10, { isStatic: true }),
+      // Left
+      Bodies.rectangle(0, ch / 2, 10, ch * 2, { isStatic: true }),
+      //Right
+      Bodies.rectangle(cw, ch / 2, 10, ch * 2, { isStatic: true }),
+      mouseConstraint,
     ]);
 
-    const render = Render.create({
-      element: sceneCurrent,
-      engine: engineCurrent,
-      options: {
-        width: cw,
-        height: ch,
-        wireframes: false,
-        background: 'transparent',
+    const chips: Chip[] = CHIPS.map((_, i) => ({
+      body: Bodies.rectangle(
+        Math.min(cw - CHIP_WIDTH / 2, Math.max(CHIP_WIDTH / 2, Math.random() * cw)),
+        Math.random() * -200 - 200,
+        CHIP_WIDTH,
+        CHIP_HEIGHT,
+        {
+          mass: 6,
+          restitution: 0.2,
+          friction: 0.1,
+          angle: Math.random() * 1.4 - 0.7,
+        },
+      ),
+      elem: chipRefs.current[i],
+      render() {
+        const { x, y } = this.body.position;
+        const elem = this.elem;
+
+        if (!elem) return;
+
+        elem.style.top = `${y - CHIP_HEIGHT / 2}px`;
+        elem.style.left = `${x - CHIP_WIDTH / 2}px`;
+        elem.style.transform = `rotate(${this.body.angle}rad)`;
       },
-    });
+    }));
 
-    const runner = Runner.run(engineCurrent);
-    Render.run(render);
-
-    const timeoutHandle = setTimeout(() => {
+    const chipsDropTimeoutHandle = setTimeout(() => {
       World.add(
-        engineCurrent.world,
-        chips.map(chip =>
-          Bodies.rectangle(Math.random() * cw, Math.random() * -200 - 200, 180, 64, {
-            mass: 10,
-            restitution: 0.5,
-            friction: 0.005,
-            angle: Math.random() * 360,
-            render: {
-              fillStyle: '#FFFFFF',
-              strokeStyle: '3px solid #0f0f0f',
-            },
-          }),
-        ),
+        engine.world,
+        chips.map(chip => chip.body),
       );
     }, SLEEP_BEFORE_CHIPS_SECS * 1000);
 
+    const topBoundTimeoutHandle = setTimeout(() => {
+      World.add(engine.world, [Bodies.rectangle(cw / 2, 0, cw, 10, { isStatic: true })]);
+    }, SLEEP_BEFORE_TOP_BOUND_SECS * 1000);
+
+    (function rerender() {
+      for (const chip of chips) {
+        chip.render();
+      }
+
+      Engine.update(engine);
+      requestRef.current = requestAnimationFrame(rerender);
+    })();
+
     return () => {
-      clearTimeout(timeoutHandle);
-      Render.stop(render);
-      Runner.stop(runner);
-      World.clear(engineCurrent.world, false);
-      Engine.clear(engineCurrent);
-      render.canvas.remove();
-      render.textures = {};
+      clearTimeout(chipsDropTimeoutHandle);
+      clearTimeout(topBoundTimeoutHandle);
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+      Engine.clear(engine);
     };
   }, []);
 
@@ -115,8 +173,21 @@ export default function Home() {
       <p ref={onlineSoonRef} className="text-base font-normal uppercase lg:text-lg">
         Online soon
       </p>
-      {/* <div ref={scene as any} className="absolute inset-0 -z-10" /> */}
-      <div ref={scene as any} className="absolute inset-0" />
+      {CHIPS.map((chip, i) => (
+        <div
+          ref={ref => ref && (chipRefs.current[i] = ref)}
+          key={i}
+          className="absolute flex select-none items-center justify-center rounded-full bg-white text-lg font-normal uppercase text-black"
+          style={{
+            width: CHIP_WIDTH,
+            height: CHIP_HEIGHT,
+            backgroundColor: CHIP_BG_COLORS[i],
+            color: CHIP_TEXT_COLORS[i],
+          }}
+        >
+          <h1>{chip}</h1>
+        </div>
+      ))}
     </main>
   );
 }
