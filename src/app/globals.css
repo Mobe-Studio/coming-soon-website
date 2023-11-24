@@ -7,7 +7,7 @@
   src:
     url('/fonts/OverusedGrotesk-VF.woff2') format('woff2 supports variations'),
     url('/fonts/OverusedGrotesk-VF.woff2') format('woff2-variations');
-  font-weight: 300 400 600;
+  font-weight: 400 500;
 }
 
 :root {

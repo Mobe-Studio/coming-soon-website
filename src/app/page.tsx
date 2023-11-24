@@ -1,51 +1,23 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
+import IconCode from '@/../public/icons/code.svg';
+import IconFigma from '@/../public/icons/figma.svg';
+import IconMobe from '@/../public/icons/mobe.svg';
 import Logo from '@/../public/logo.svg';
 import { gsap } from 'gsap';
 import { Bodies, Engine, MouseConstraint, World } from 'matter-js';
 import { useEffect, useLayoutEffect, useRef } from 'react';
-
-const LOGO_ANIMATION_DURATION_SECS = 0.5;
-const DESCRIPTION_ANIMATION_DURATION_SECS = 0.8;
-const ONLINE_SOON_ANIMATION_DURATION_SECS = 0.8;
-const SLEEP_BEFORE_CHIPS_SECS =
-  LOGO_ANIMATION_DURATION_SECS + DESCRIPTION_ANIMATION_DURATION_SECS + ONLINE_SOON_ANIMATION_DURATION_SECS + 1;
-const SLEEP_BEFORE_TOP_BOUND_SECS = SLEEP_BEFORE_CHIPS_SECS + 2;
-const CHIP_WIDTH = 180;
-const CHIP_HEIGHT = 60;
-const CHIPS = [
-  'Code',
-  'Development',
-  'Software',
-  'User Experience',
-  'User Interface',
-  'Animation',
-  'Branding',
-  'Creativity',
-  'Web-design',
-];
-const CHIP_BG_COLORS = [
-  '#45C358',
-  '#45C358',
-  '#45C358',
-  '#505FEC',
-  '#505FEC',
-  '#505FEC',
-  '#FFFFFF',
-  '#FFFFFF',
-  '#FFFFFF',
-];
-const CHIP_TEXT_COLORS = [
-  '#FFFFFF',
-  '#FFFFFF',
-  '#FFFFFF',
-  '#FFFFFF',
-  '#FFFFFF',
-  '#FFFFFF',
-  '#505FEC',
-  '#505FEC',
-  '#505FEC',
-];
+import {
+  CHIPS,
+  DESCRIPTION_ANIMATION_DURATION_SECS,
+  ICON_CHIPS,
+  Icons,
+  LOGO_ANIMATION_DURATION_SECS,
+  ONLINE_SOON_ANIMATION_DURATION_SECS,
+  SLEEP_BEFORE_CHIPS_SECS,
+  SLEEP_BEFORE_TOP_BOUND_SECS,
+  getHorizontalWallsDistance,
+  getVerticalWallsDistance,
+} from './const';
 
 type Chip = {
   body: Matter.Body;
@@ -58,9 +30,13 @@ export default function Home() {
   const descriptionRef = useRef(null);
   const onlineSoonRef = useRef(null);
 
+  const cw = document.body.clientWidth;
+  const isMobile = cw < 768;
+
   const requestRef = useRef<number>();
   const engineRef = useRef(Engine.create());
-  const chipRefs = useRef<(HTMLDivElement | undefined)[]>(CHIPS.map(() => undefined));
+  const chipRefs = useRef<(HTMLDivElement | undefined)[]>(CHIPS(isMobile).map(() => undefined));
+  const iconChipRefs = useRef<(HTMLDivElement | undefined)[]>(ICON_CHIPS(isMobile).map(() => undefined));
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -90,24 +66,28 @@ export default function Home() {
     const cw = document.body.clientWidth;
     const ch = document.body.clientHeight;
 
+    const horizontalWallsDistance = getHorizontalWallsDistance(isMobile);
+    const verticalWallsDistance = getVerticalWallsDistance(isMobile);
+
     const mouseConstraint = MouseConstraint.create(engine);
     World.add(engine.world, [
-      // Bottom
-      Bodies.rectangle(cw / 2, ch, cw * 2, 10, { isStatic: true }),
-      // Left
-      Bodies.rectangle(0, ch / 2, 10, ch * 2, { isStatic: true }),
-      //Right
-      Bodies.rectangle(cw, ch / 2, 10, ch * 2, { isStatic: true }),
+      // ground
+      Bodies.rectangle(cw / 2, ch, cw * 2, horizontalWallsDistance * 2, { isStatic: true }),
+      // wall left
+      Bodies.rectangle(0, ch / 2, verticalWallsDistance * 2, ch * 2, { isStatic: true }),
+      // wall right
+      Bodies.rectangle(cw, ch / 2, verticalWallsDistance * 2, ch * 2, { isStatic: true }),
       mouseConstraint,
     ]);
 
-    const chips: Chip[] = CHIPS.map((_, i) => ({
+    const chips: Chip[] = CHIPS(isMobile).map(({ h, w }, i) => ({
       body: Bodies.rectangle(
-        Math.min(cw - CHIP_WIDTH / 2, Math.max(CHIP_WIDTH / 2, Math.random() * cw)),
-        Math.random() * -200 - 200,
-        CHIP_WIDTH,
-        CHIP_HEIGHT,
+        Math.min(cw - verticalWallsDistance - w / 2, Math.max(w / 2 + verticalWallsDistance, Math.random() * cw)),
+        -200,
+        w,
+        h,
         {
+          chamfer: { radius: 30 },
           mass: 6,
           restitution: 0.2,
           friction: 0.1,
@@ -121,8 +101,34 @@ export default function Home() {
 
         if (!elem) return;
 
-        elem.style.top = `${y - CHIP_HEIGHT / 2}px`;
-        elem.style.left = `${x - CHIP_WIDTH / 2}px`;
+        elem.style.top = `${y - h / 2}px`;
+        elem.style.left = `${x - w / 2}px`;
+        elem.style.transform = `rotate(${this.body.angle}rad)`;
+      },
+    }));
+
+    const iconChips: Chip[] = ICON_CHIPS(isMobile).map(({ h, w }, i) => ({
+      body: Bodies.rectangle(
+        Math.min(cw - verticalWallsDistance - w / 2, Math.max(w / 2 + verticalWallsDistance, Math.random() * cw)),
+        -200,
+        w,
+        h,
+        {
+          chamfer: { radius: 30 },
+          mass: 6,
+          restitution: 0.2,
+          friction: 0.1,
+        },
+      ),
+      elem: iconChipRefs.current[i],
+      render() {
+        const { x, y } = this.body.position;
+        const elem = this.elem;
+
+        if (!elem) return;
+
+        elem.style.top = `${y - h / 2}px`;
+        elem.style.left = `${x - w / 2}px`;
         elem.style.transform = `rotate(${this.body.angle}rad)`;
       },
     }));
@@ -132,15 +138,23 @@ export default function Home() {
         engine.world,
         chips.map(chip => chip.body),
       );
+      World.add(
+        engine.world,
+        iconChips.map(chip => chip.body),
+      );
     }, SLEEP_BEFORE_CHIPS_SECS * 1000);
 
     const topBoundTimeoutHandle = setTimeout(() => {
-      World.add(engine.world, [Bodies.rectangle(cw / 2, 0, cw, 10, { isStatic: true })]);
+      World.add(engine.world, [Bodies.rectangle(cw / 2, 0, cw, horizontalWallsDistance * 2, { isStatic: true })]);
     }, SLEEP_BEFORE_TOP_BOUND_SECS * 1000);
 
     (function rerender() {
       for (const chip of chips) {
         chip.render();
+      }
+
+      for (const iconChip of iconChips) {
+        iconChip.render();
       }
 
       Engine.update(engine);
@@ -155,36 +169,69 @@ export default function Home() {
       }
       Engine.clear(engine);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <main className="flex h-[100svh] flex-col items-center p-6 lg:p-8">
-      <div className="flex max-w-[300px] flex-col items-center gap-0 md:max-w-[500px] lg:max-w-[600px] lg:gap-8">
-        <div ref={logoRef} className="w-full">
-          <Logo alt="Mobe Studio" title="Mobe Studio" className="w-full" />
-        </div>
-        <p ref={descriptionRef} className="mb-8 text-center text-2xl font-light md:text-4xl md:leading-[120%] lg:mb-6">
-          Digital Experience studio
-          <br />
-          based in Bergamo (Italy)
-        </p>
-        <p ref={onlineSoonRef} className="text-base font-normal uppercase lg:text-lg">
-          Online soon
-        </p>
+    <main className="flex h-[100svh] flex-col items-center">
+      <div ref={logoRef} className="absolute top-[18px] md:top-[28px]">
+        <Logo alt="Mobe Studio" title="Mobe Studio" width={isMobile ? 164 : 258} height={isMobile ? 28 : 42} />
       </div>
-      {CHIPS.map((chip, i) => (
+      <p
+        ref={descriptionRef}
+        className="absolute top-[88px] mb-8 text-center text-2xl font-light md:top-[176px] md:text-5xl md:leading-[120%] lg:mb-6 lg:text-6xl"
+      >
+        Digital Experience studio
+        <br />
+        based in Bergamo (Italy)
+      </p>
+      <p
+        ref={onlineSoonRef}
+        className="absolute bottom-[24px] text-base font-normal uppercase md:bottom-[38px] lg:text-lg"
+      >
+        Online soon
+      </p>
+      <div className="absolute inset-x-0 h-px bg-[#525963]/40" style={{ top: getHorizontalWallsDistance(isMobile) }} />
+      <div
+        className="absolute inset-x-0 h-px bg-[#525963]/40"
+        style={{ bottom: getHorizontalWallsDistance(isMobile) }}
+      />
+      <div className="absolute inset-y-0 w-px bg-[#525963]/40" style={{ left: getVerticalWallsDistance(isMobile) }} />
+      <div className="absolute inset-y-0 w-px bg-[#525963]/40" style={{ right: getVerticalWallsDistance(isMobile) }} />
+      {CHIPS(isMobile).map(({ title, color, textColor, w, h }, i) => (
         <div
           ref={ref => ref && (chipRefs.current[i] = ref)}
           key={i}
-          className="absolute flex select-none items-center justify-center rounded-full bg-white text-lg font-semibold text-black"
+          className="absolute flex select-none items-center justify-center rounded-full bg-white text-lg font-medium text-black"
           style={{
-            width: CHIP_WIDTH,
-            height: CHIP_HEIGHT,
-            backgroundColor: CHIP_BG_COLORS[i],
-            color: CHIP_TEXT_COLORS[i],
+            width: w,
+            height: h,
+            backgroundColor: color,
+            color: textColor,
           }}
         >
-          <h1>{chip}</h1>
+          <h1>{title}</h1>
+        </div>
+      ))}
+      {ICON_CHIPS(isMobile).map(({ icon, color, borderColor, w, h }, i) => (
+        <div
+          ref={ref => ref && (iconChipRefs.current[i] = ref)}
+          key={i}
+          className="absolute flex select-none items-center justify-center rounded-full border bg-white text-lg font-medium text-black"
+          style={{
+            width: w,
+            height: h,
+            backgroundColor: color,
+            borderColor,
+          }}
+        >
+          {icon === Icons.Code ? (
+            <IconCode width={24} height={24} />
+          ) : icon === Icons.Figma ? (
+            <IconFigma width={24} height={24} />
+          ) : icon === Icons.Mobe ? (
+            <IconMobe width={24} height={24} />
+          ) : null}
         </div>
       ))}
     </main>
