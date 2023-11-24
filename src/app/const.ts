@@ -5,6 +5,8 @@ export const SLEEP_BEFORE_CHIPS_SECS =
   LOGO_ANIMATION_DURATION_SECS + DESCRIPTION_ANIMATION_DURATION_SECS + ONLINE_SOON_ANIMATION_DURATION_SECS + 1;
 export const SLEEP_BEFORE_TOP_BOUND_SECS = SLEEP_BEFORE_CHIPS_SECS + 2;
 
+export const MOBILE_BREAKPOINT = 768;
+
 export const VERTICAL_WALLS_DISTANCE = 96;
 export const VERTICAL_WALLS_DISTANCE_MOBILE = 24;
 export const getVerticalWallsDistance = (isMobile: boolean) =>
@@ -16,7 +18,7 @@ export const getHorizontalWallsDistance = (isMobile: boolean) =>
   isMobile ? HORIZONTAL_WALLS_DISTANCE_MOBILE : HORIZONTAL_WALLS_DISTANCE;
 
 export const CHIP_HEIGHT = 60;
-export const CHIP_HEIGHT_MOBILE = 35;
+export const CHIP_HEIGHT_MOBILE = 45;
 
 export const CHIPS = (isMobile: boolean) => [
   {

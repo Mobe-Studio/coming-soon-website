@@ -5,13 +5,14 @@ import IconMobe from '@/../public/icons/mobe.svg';
 import Logo from '@/../public/logo.svg';
 import { gsap } from 'gsap';
 import { Bodies, Engine, MouseConstraint, World } from 'matter-js';
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   CHIPS,
   DESCRIPTION_ANIMATION_DURATION_SECS,
   ICON_CHIPS,
   Icons,
   LOGO_ANIMATION_DURATION_SECS,
+  MOBILE_BREAKPOINT,
   ONLINE_SOON_ANIMATION_DURATION_SECS,
   SLEEP_BEFORE_CHIPS_SECS,
   SLEEP_BEFORE_TOP_BOUND_SECS,
@@ -30,8 +31,7 @@ export default function Home() {
   const descriptionRef = useRef(null);
   const onlineSoonRef = useRef(null);
 
-  const cw = document.body.clientWidth;
-  const isMobile = cw < 768;
+  const [isMobile, setMobile] = useState(true);
 
   const requestRef = useRef<number>();
   const engineRef = useRef(Engine.create());
@@ -66,6 +66,9 @@ export default function Home() {
     const cw = document.body.clientWidth;
     const ch = document.body.clientHeight;
 
+    const isMobile = cw < MOBILE_BREAKPOINT;
+    setMobile(cw < MOBILE_BREAKPOINT);
+
     const horizontalWallsDistance = getHorizontalWallsDistance(isMobile);
     const verticalWallsDistance = getVerticalWallsDistance(isMobile);
 
@@ -87,7 +90,7 @@ export default function Home() {
         w,
         h,
         {
-          chamfer: { radius: 30 },
+          chamfer: { radius: h / 2 },
           mass: 6,
           restitution: 0.2,
           friction: 0.1,
@@ -114,7 +117,7 @@ export default function Home() {
         w,
         h,
         {
-          chamfer: { radius: 30 },
+          chamfer: { radius: h / 2 },
           mass: 6,
           restitution: 0.2,
           friction: 0.1,
@@ -202,7 +205,7 @@ export default function Home() {
         <div
           ref={ref => ref && (chipRefs.current[i] = ref)}
           key={i}
-          className="absolute flex select-none items-center justify-center rounded-full bg-white text-lg font-medium text-black"
+          className="absolute flex cursor-grab select-none items-center justify-center rounded-full bg-white text-lg font-medium text-black active:cursor-grabbing"
           style={{
             width: w,
             height: h,
@@ -217,7 +220,7 @@ export default function Home() {
         <div
           ref={ref => ref && (iconChipRefs.current[i] = ref)}
           key={i}
-          className="absolute flex select-none items-center justify-center rounded-full border bg-white text-lg font-medium text-black"
+          className="absolute flex cursor-grab select-none items-center justify-center rounded-full border bg-white text-lg font-medium text-black active:cursor-grabbing"
           style={{
             width: w,
             height: h,
