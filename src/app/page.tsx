@@ -178,7 +178,7 @@ export default function Home() {
   return (
     <main className="flex h-[100svh] flex-col items-center">
       <div ref={logoRef} className="absolute top-[18px] md:top-[28px]">
-        <Logo alt="Mobe Studio" title="Mobe Studio" width={isMobile ? 164 : 258} height={isMobile ? 28 : 42} />
+        <Logo alt="Mobe Studio" title="Mobe Studio" className="h-[28px] w-[164px] md:h-[42px] md:w-[258px]" />
       </div>
       <p
         ref={descriptionRef}
@@ -194,18 +194,15 @@ export default function Home() {
       >
         Online soon
       </p>
-      <div className="absolute inset-x-0 h-px bg-[#525963]/40" style={{ top: getHorizontalWallsDistance(isMobile) }} />
-      <div
-        className="absolute inset-x-0 h-px bg-[#525963]/40"
-        style={{ bottom: getHorizontalWallsDistance(isMobile) }}
-      />
-      <div className="absolute inset-y-0 w-px bg-[#525963]/40" style={{ left: getVerticalWallsDistance(isMobile) }} />
-      <div className="absolute inset-y-0 w-px bg-[#525963]/40" style={{ right: getVerticalWallsDistance(isMobile) }} />
+      <div className="absolute inset-x-0 top-[64px] h-px bg-[#525963]/40 md:top-[96px]" />
+      <div className="absolute inset-x-0 bottom-[64px] h-px bg-[#525963]/40 md:bottom-[96px]" />
+      <div className="absolute inset-y-0 left-[24px] w-px bg-[#525963]/40 md:left-[96px]" />
+      <div className="absolute inset-y-0 right-[24px] w-px bg-[#525963]/40 md:right-[96px]" />
       {CHIPS(isMobile).map(({ title, color, textColor, w, h }, i) => (
         <div
           ref={ref => ref && (chipRefs.current[i] = ref)}
           key={i}
-          className="absolute flex cursor-grab select-none items-center justify-center rounded-full bg-white text-lg font-medium text-black active:cursor-grabbing"
+          className="absolute top-[-200px] flex cursor-grab select-none items-center justify-center rounded-full bg-white text-lg font-medium text-black active:cursor-grabbing"
           style={{
             width: w,
             height: h,
@@ -220,7 +217,7 @@ export default function Home() {
         <div
           ref={ref => ref && (iconChipRefs.current[i] = ref)}
           key={i}
-          className="absolute flex cursor-grab select-none items-center justify-center rounded-full border bg-white text-lg font-medium text-black active:cursor-grabbing"
+          className="absolute top-[-200px] flex cursor-grab select-none items-center justify-center rounded-full border bg-white text-lg font-medium text-black active:cursor-grabbing"
           style={{
             width: w,
             height: h,
