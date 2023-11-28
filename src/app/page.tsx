@@ -43,7 +43,7 @@ export default function Home() {
       gsap
         .timeline()
         .from(logoRef.current, {
-          y: '160',
+          y: '-160',
           duration: LOGO_ANIMATION_DURATION_SECS,
           opacity: 0,
         })
@@ -52,6 +52,7 @@ export default function Home() {
           opacity: 0,
         })
         .from(onlineSoonRef.current, {
+          y: '160',
           duration: ONLINE_SOON_ANIMATION_DURATION_SECS,
           opacity: 0,
         });
@@ -86,7 +87,7 @@ export default function Home() {
     const chips: Chip[] = CHIPS(isMobile).map(({ h, w }, i) => ({
       body: Bodies.rectangle(
         Math.min(cw - verticalWallsDistance - w / 2, Math.max(w / 2 + verticalWallsDistance, Math.random() * cw)),
-        -200,
+        -300,
         w,
         h,
         {
