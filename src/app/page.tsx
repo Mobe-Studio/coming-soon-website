@@ -2,7 +2,7 @@
 import IconCode from '@/../public/icons/code.svg';
 import IconFigma from '@/../public/icons/figma.svg';
 import IconMobe from '@/../public/icons/mobe.svg';
-import Logo from '@/../public/logo.svg';
+import Logo from '@/../public/mobe-studio-logo-l-light.svg';
 import { gsap } from 'gsap';
 import { Bodies, Engine, MouseConstraint, World } from 'matter-js';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
