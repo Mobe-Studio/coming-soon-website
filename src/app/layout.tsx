@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import './globals.css';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -39,6 +40,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#505fec" />
         <meta name="msapplication-TileColor" content="#505fec" />
         <meta name="theme-color" content="#ffffff" />
+        <Script
+          id="microsoft-clarity-init"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(c,l,a,r,i,t,y){
+                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "maw84uxpjh");
+            `,
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>

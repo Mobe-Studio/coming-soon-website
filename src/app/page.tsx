@@ -33,7 +33,7 @@ export default function Home() {
   const footerRef = useRef(null);
 
   const [isMobile, setMobile] = useState(true);
-  const [maxContentWidth, setMaxContentWidth] = useState(document.body.clientWidth);
+  const [maxContentWidth, setMaxContentWidth] = useState(0);
 
   const requestRef = useRef<number>();
   const engineRef = useRef(Engine.create());
