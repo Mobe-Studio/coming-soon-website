@@ -8,12 +8,13 @@ import { Bodies, Engine, MouseConstraint, World } from 'matter-js';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   CHIPS,
+  CONTENT_PADDING_FROM_WALLS,
   DESCRIPTION_ANIMATION_DURATION_SECS,
+  FOOTER_ANIMATION_DURATION_SECS,
   ICON_CHIPS,
   Icons,
   LOGO_ANIMATION_DURATION_SECS,
   MOBILE_BREAKPOINT,
-  ONLINE_SOON_ANIMATION_DURATION_SECS,
   SLEEP_BEFORE_CHIPS_SECS,
   SLEEP_BEFORE_TOP_BOUND_SECS,
   getHorizontalWallsDistance,
@@ -29,9 +30,10 @@ type Chip = {
 export default function Home() {
   const logoRef = useRef(null);
   const descriptionRef = useRef(null);
-  const onlineSoonRef = useRef(null);
+  const footerRef = useRef(null);
 
   const [isMobile, setMobile] = useState(true);
+  const [maxContentWidth, setMaxContentWidth] = useState(document.body.clientWidth);
 
   const requestRef = useRef<number>();
   const engineRef = useRef(Engine.create());
@@ -51,9 +53,9 @@ export default function Home() {
           duration: DESCRIPTION_ANIMATION_DURATION_SECS,
           opacity: 0,
         })
-        .from(onlineSoonRef.current, {
+        .from(footerRef.current, {
           y: '160',
-          duration: ONLINE_SOON_ANIMATION_DURATION_SECS,
+          duration: FOOTER_ANIMATION_DURATION_SECS,
           opacity: 0,
         });
     });
@@ -72,6 +74,8 @@ export default function Home() {
 
     const horizontalWallsDistance = getHorizontalWallsDistance(isMobile);
     const verticalWallsDistance = getVerticalWallsDistance(isMobile);
+
+    setMaxContentWidth(cw - verticalWallsDistance * 2);
 
     const mouseConstraint = MouseConstraint.create(engine);
     World.add(engine.world, [
@@ -181,20 +185,27 @@ export default function Home() {
       <div ref={logoRef} className="absolute top-[18px] md:top-[28px]">
         <Logo alt="Mobe Studio" title="Mobe Studio" className="h-[28px] w-[164px] md:h-[42px] md:w-[258px]" />
       </div>
-      <p
+      <div
         ref={descriptionRef}
-        className="absolute top-[88px] mb-8 text-center text-2xl font-light md:top-[176px] md:text-5xl md:leading-[120%] lg:mb-6 lg:text-6xl"
+        className="absolute top-[88px] flex flex-col items-center gap-4 md:top-[132px] lg:top-[176px] lg:gap-6"
+        style={{
+          width: maxContentWidth - CONTENT_PADDING_FROM_WALLS * 2,
+        }}
       >
-        Digital Experience studio
-        <br />
-        based in Bergamo (Italy)
-      </p>
-      <p
-        ref={onlineSoonRef}
-        className="absolute bottom-[24px] text-base font-normal uppercase md:bottom-[38px] lg:text-lg"
-      >
-        Online soon
-      </p>
+        <p className="text-center text-2xl font-light md:text-5xl md:leading-[120%] lg:text-6xl">
+          Digital Experience studio
+          <br />
+          based in Bergamo (Italy)
+        </p>
+      </div>
+      <div ref={footerRef} className="absolute bottom-[24px] md:bottom-[38px]">
+        <p className="text-base font-normal text-white/80 lg:text-lg">
+          Contact us:{' '}
+          <a href="mailto:hello@mobestudio.com" className="text-white underline">
+            hello@mobestudio.com
+          </a>
+        </p>
+      </div>
       <div className="absolute inset-x-0 top-[64px] h-px bg-[#525963]/40 md:top-[96px]" />
       <div className="absolute inset-x-0 bottom-[64px] h-px bg-[#525963]/40 md:bottom-[96px]" />
       <div className="absolute inset-y-0 left-[24px] w-px bg-[#525963]/40 md:left-[96px]" />
@@ -203,7 +214,7 @@ export default function Home() {
         <div
           ref={ref => ref && (chipRefs.current[i] = ref)}
           key={i}
-          className="absolute top-[-200px] flex cursor-grab select-none items-center justify-center rounded-full bg-white text-lg font-medium text-black active:cursor-grabbing"
+          className="absolute top-[-200px] flex cursor-grab select-none items-center justify-center rounded-full border border-black bg-white text-lg font-medium text-black active:cursor-grabbing"
           style={{
             width: w,
             height: h,
