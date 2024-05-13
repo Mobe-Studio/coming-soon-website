@@ -10,7 +10,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="keywords" content="Design, Software, Web, Website, Studio, Agency, Responsive" />
         <meta name="author" content="Mobe Studio" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Coming soon - Mobe Studio</title>
+        <title>Mobe Studio</title>
         <meta property="og:title" content="Mobe Studio" />
         <meta property="twitter:title" content="Mobe Studio" />
         <meta property="og:locale" content="en_US" />
